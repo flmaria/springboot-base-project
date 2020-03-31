@@ -1,0 +1,20 @@
+###### Login test
+Method type: POST
+
+http://localhost:8080/springboot-base/login
+
+#Params
+{"login":"admin", "password":"admin"}
+
+#Expected result
+
+{
+    "token": <hash-token>"
+}
+
+######User listing test
+Method type: GET
+
+http://localhost:8080/springboot-base/users
+
+Authorization: Bearer Token
