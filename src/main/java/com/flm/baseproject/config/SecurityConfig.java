@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -33,7 +34,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private static final String LOGIN = "/login/**";
 	
 	@Autowired
-    CustomUserDetailsService customUserDetailsService;
+    private CustomUserDetailsService customUserDetailsService;
 
     @Autowired
     private JwtAuthenticationEntryPoint unauthorizedHandler;
@@ -83,11 +84,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .antMatchers(HttpMethod.PUT,Roles.ROLE_USER_UPDATE.getUrl()).access(hasRole(Roles.ROLE_USER_SAVE))
                     .antMatchers(HttpMethod.DELETE,Roles.ROLE_USER_DELETE.getUrl()).access(hasRole(Roles.ROLE_USER_DELETE))
                     
+                    //Profile
+                    .antMatchers(HttpMethod.GET,Roles.ROLE_PROFILE_LIST.getUrl()).access(hasRole(Roles.ROLE_PROFILE_LIST))
+                    
                     //Generic
-                    .antMatchers(HttpMethod.GET,Roles.ROLE_GENERIC_LIST.getUrl()).access(hasRole(Roles.ROLE_GENERIC_LIST))
-                    .antMatchers(HttpMethod.POST,Roles.ROLE_GENERIC_SAVE.getUrl()).access(hasRole(Roles.ROLE_GENERIC_SAVE))
-                    .antMatchers(HttpMethod.PUT,Roles.ROLE_GENERIC_UPDATE.getUrl()).access(hasRole(Roles.ROLE_GENERIC_SAVE))
-                    .antMatchers(HttpMethod.DELETE,Roles.ROLE_GENERIC_DELETE.getUrl()).access(hasRole(Roles.ROLE_GENERIC_DELETE))
+//                    .antMatchers(HttpMethod.GET,Roles.ROLE_GENERIC_LIST.getUrl()).access(hasRole(Roles.ROLE_GENERIC_LIST))
+//                    .antMatchers(HttpMethod.POST,Roles.ROLE_GENERIC_SAVE.getUrl()).access(hasRole(Roles.ROLE_GENERIC_SAVE))
+//                    .antMatchers(HttpMethod.PUT,Roles.ROLE_GENERIC_UPDATE.getUrl()).access(hasRole(Roles.ROLE_GENERIC_SAVE))
+//                    .antMatchers(HttpMethod.DELETE,Roles.ROLE_GENERIC_DELETE.getUrl()).access(hasRole(Roles.ROLE_GENERIC_DELETE))
                     
                     .anyRequest().authenticated();
         

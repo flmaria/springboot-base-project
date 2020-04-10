@@ -1,29 +1,29 @@
 package com.flm.baseproject.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.flm.baseproject.model.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-	Optional<User> findByEmail(String email);
 	
-	Optional<User> findByLoginOrEmail(String login, String email);
+	@Query("SELECT u FROM User u WHERE u.id = :id")
+	public User findById(@Param("id") long id);
+	
+	@Query("SELECT u FROM User u WHERE UPPER(u.login) = UPPER(:loginOrEmail) OR UPPER(u.email) = UPPER(:loginOrEmail)")
+	public User findByLoginOrEmail(@Param("loginOrEmail") String loginOrEmail);
 
-    List<User> findByNameContainingIgnoreCaseOrderByNameAsc(String name);
+	@Query("SELECT u FROM User u ORDER BY u.name")
+    public List<User> findAllOrderByNameAsc();
     
-    List<User> findByOrderByNameAsc();
+    @Query("SELECT u FROM User u WHERE UPPER(u.login) = UPPER(:login)")
+    public User findByLogin(@Param("login") String login);
     
-	List<User> findByIdIn(List<Long> userIds);
-
-	Optional<User> findByLogin(String login);
-
-	Boolean existsByLogin(String login);
-
-	Boolean existsByEmail(String email);
-
+    @Query("SELECT u FROM User u WHERE UPPER(u.email) = UPPER(:email)")
+	public User findByEmail(@Param("email") String email);
 }

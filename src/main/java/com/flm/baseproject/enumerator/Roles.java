@@ -3,16 +3,19 @@ package com.flm.baseproject.enumerator;
 public enum Roles {
 	
 	//User
-	ROLE_USER_LIST("/users/**", "users list"),
-	ROLE_USER_SAVE("/users/**", "users save"),
-	ROLE_USER_UPDATE("/users/**", "users update"),
-	ROLE_USER_DELETE("/users/**", "users delete"),
+	ROLE_USER_LIST("/users/**", "user list"),
+	ROLE_USER_SAVE("/users/**", "user save"),
+	ROLE_USER_UPDATE("/users/**", "user update"),
+	ROLE_USER_DELETE("/users/**", "user delete"),
+	
+	//Profile
+	ROLE_PROFILE_LIST("/profiles/**", "profile list");
 	
 	//Generic Page
-	ROLE_GENERIC_LIST("/generics/**", "generics list"),
-	ROLE_GENERIC_SAVE("/generics/**", "generics save"),
-	ROLE_GENERIC_UPDATE("/generics/**", "generics update"),
-	ROLE_GENERIC_DELETE("/generics/**", "generics delete");
+//	ROLE_GENERIC_LIST("/generics/**", "generics list"),
+//	ROLE_GENERIC_SAVE("/generics/**", "generics save"),
+//	ROLE_GENERIC_UPDATE("/generics/**", "generics update"),
+//	ROLE_GENERIC_DELETE("/generics/**", "generics delete");
 	
 	private String url;
 	private String description;

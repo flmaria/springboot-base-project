@@ -6,12 +6,13 @@ public enum Profiles {
 	PROFILE_ADMIN("Admin", "Admin", new Enum[]
 			{ 
 					Roles.ROLE_USER_LIST, Roles.ROLE_USER_SAVE, Roles.ROLE_USER_UPDATE, Roles.ROLE_USER_DELETE,
-					Roles.ROLE_GENERIC_LIST, Roles.ROLE_GENERIC_SAVE, Roles.ROLE_GENERIC_UPDATE, Roles.ROLE_GENERIC_DELETE
+					Roles.ROLE_PROFILE_LIST
 			}
 	),
 	PROFILE_REGULAR("Regular", "Regular", new Enum[]
 			{ 
-					Roles.ROLE_GENERIC_LIST, Roles.ROLE_GENERIC_SAVE, Roles.ROLE_GENERIC_UPDATE, Roles.ROLE_GENERIC_DELETE
+					Roles.ROLE_PROFILE_LIST
+//					Roles.ROLE_GENERIC_LIST, Roles.ROLE_GENERIC_SAVE, Roles.ROLE_GENERIC_UPDATE, Roles.ROLE_GENERIC_DELETE
 			}
 	);
 	

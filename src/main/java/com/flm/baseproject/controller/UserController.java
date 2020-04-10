@@ -1,14 +1,8 @@
 package com.flm.baseproject.controller;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,81 +13,47 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.flm.baseproject.exception.ResourceNotFoundException;
-import com.flm.baseproject.model.Profile;
 import com.flm.baseproject.model.User;
-import com.flm.baseproject.service.ProfileService;
 import com.flm.baseproject.service.UserService;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("users")
 public class UserController {
 	
-	@Autowired
-	private UserService userService;
-	
-	@Autowired
-	private ProfileService profileService;
-	
-	@Autowired
-	PasswordEncoder passwordEncoder;
+	private final UserService userService;
 	
 	@GetMapping
-    public List<User> getAllUsers() {
-		return userService.listAll();
+    public List<User> findAllOrderByNameAsc() {
+		return userService.findAllOrderByNameAsc();
     }
 
 	@GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable(value = "id") Long userId) throws ResourceNotFoundException {
-		return userService.findById(userId).map(record -> {
-			record.setPassword("password");
-			return ResponseEntity.ok().body(record);
-		}).orElse(ResponseEntity.notFound().build());
+		User user = this.userService.findById(userId);
+		
+		if (user == null)
+			return ResponseEntity.notFound().build();
+		
+		return ResponseEntity.ok().body(user);
     }
     
 	@PostMapping
-    public User createUser(@Valid @RequestBody User user) {
-		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		return userService.save(user);
+    public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
+		return ResponseEntity.ok().body(this.userService.save(user));
     }
 
-	@PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable(value = "id") Long userId,
-         @Valid @RequestBody User user) throws ResourceNotFoundException {
-		return userService.findById(userId).map(record -> {
-			record.setName(user.getName());
-			record.setLogin(user.getLogin());
-			record.setEmail(user.getEmail());
-			
-			if ((user.getPassword() != null && !user.getPassword().trim().equals("")) ||  user.getPassword().trim().equals("password")) {
-				record.setPassword(passwordEncoder.encode(user.getPassword()));
-			}
-			
-			record.setProfile(user.getProfile());
-			
-			User updated = userService.save(record);
-			return ResponseEntity.ok().body(updated);
-		}).orElse(ResponseEntity.notFound().build());
-		
-    }
+	@PutMapping
+    public ResponseEntity<User> updateUser(@Valid @RequestBody User user) throws ResourceNotFoundException {
+		return ResponseEntity.ok().body(this.userService.save(user));
+	}
 
 	@DeleteMapping("/{id}")
-    public Map<String, Boolean> deleteUser(@PathVariable(value = "id") Long userId)
-         throws ResourceNotFoundException {
-		User user = userService.findById(userId)
-       .orElseThrow(() -> new ResourceNotFoundException("User", "userId", userId));
-		
-		userService.deleteById(user.getId());
-        Map<String, Boolean> response = new HashMap<>();
-        response.put("deleted", Boolean.TRUE);
-        return response;
+    public  ResponseEntity<Boolean> deleteUser(@PathVariable(value = "id") Long userId) {
+		userService.deleteById(userId);
+		return ResponseEntity.ok().body(true);
     }
 	
-	@GetMapping("/profiles")
-    public List<Profile> getAllProfiles() throws ResourceNotFoundException {
-		return this.profileService.findAll();
-    }
-	
-	
-	
-
 }
