@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,7 +15,7 @@ import com.flm.baseproject.model.Role;
 import com.flm.baseproject.model.User;
 
 public class UserPrincipal implements UserDetails {
-	
+
 	private static final long serialVersionUID = 1L;
 
 	private Long id;
@@ -30,11 +29,12 @@ public class UserPrincipal implements UserDetails {
 
 	@JsonIgnore
 	private String password;
-
+	
 	private Collection<? extends GrantedAuthority> authorities;
 
 	public UserPrincipal(Long id, String name, String username, String email, String password,
 			Collection<? extends GrantedAuthority> authorities) {
+		
 		this.id = id;
 		this.name = name;
 		this.username = username;
@@ -44,7 +44,6 @@ public class UserPrincipal implements UserDetails {
 	}
 
 	public static UserPrincipal create(User user) {
-		
 		Set<Role> roles = new HashSet<Role>();
 		roles.addAll(user.getProfile().getRoles());
 		

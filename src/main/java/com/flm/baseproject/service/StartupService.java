@@ -1,8 +1,6 @@
 package com.flm.baseproject.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.flm.baseproject.enumerator.Profiles;
@@ -10,25 +8,19 @@ import com.flm.baseproject.enumerator.Roles;
 import com.flm.baseproject.model.Profile;
 import com.flm.baseproject.model.Role;
 import com.flm.baseproject.model.User;
-import com.flm.baseproject.repository.ProfileRepository;
-import com.flm.baseproject.repository.RoleRepository;
-import com.flm.baseproject.repository.UserRepository;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @Service
 public class StartupService {
 	
-	@Autowired
-	RoleRepository roleRepository;
+	private final RoleService roleService;
 
-	@Autowired
-	ProfileRepository profileRepository;
+	private final ProfileService profileService;
 
-	@Autowired
-	UserRepository userRepository;
-
-	@Autowired
-	PasswordEncoder passwordEncoder;
-
+	private final UserService userService;
+	
 	@Value("${admin.login}")
 	private String adminLogin;
 
@@ -45,49 +37,46 @@ public class StartupService {
 	public void init() {
 
 		// INSERT ROLES
-		for (Roles rn : Roles.values()) {
-			Role bdRole = roleRepository.findByName(rn);
-			if (null == bdRole) {
-				Role role = new Role();
-				role.setName(rn);
-				role.setDescription(rn.getDescription());
-				roleRepository.save(role);
+		for (Roles roles : Roles.values()) {
+			Role role = this.roleService.findByName(roles);
+			if (role == null) {
+				role = new Role();
+				role.setName(roles);
+				role.setDescription(roles.getDescription());
+				this.roleService.save(role);
 			}
 		}
 
 		// CREATE PROFILES
-		
 		for (Profiles p : Profiles.values()) {
-			Profile profile = profileRepository.findProfileByName(p.getName());
+			Profile profile = this.profileService.findByName(p.getName());
+			
 			if(null == profile) {
 				profile = new Profile();
 				profile.setName(p.getName());
 				for (Enum e : p.getRoles()) {
 					Roles r = (Roles) e;
-					Role bdRole = roleRepository.findByName(r);
+					Role bdRole = this.roleService.findByName(r);
+					
 					profile.getRoles().add(bdRole);
 				}
-				profileRepository.save(profile);
+				
+				this.profileService.save(profile);
 			}
-
-			
 		}
 		
-
-		Boolean existsByLogin = userRepository.existsByLogin(adminLogin);
-		String adminPswrd = passwordEncoder.encode(adminPassword);
+		User adminUser = this.userService.findByLogin(adminLogin);
 		
-		if (!existsByLogin) {
-			User adminUser = new User();
+		if (adminUser == null) {
+			adminUser = new User();
 			adminUser.setEmail(adminEmail);
 			adminUser.setName(adminName);
 			adminUser.setLogin(adminLogin);
-			adminUser.setPassword(adminPswrd);
-			adminUser.setProfile(this.profileRepository.findProfileByName(Profiles.PROFILE_ADMIN.getName()));
+			adminUser.setNewPassword(adminPassword);
+			adminUser.setProfile(this.profileService.findByName(Profiles.PROFILE_ADMIN.getName()));
 			
-			userRepository.save(adminUser);
+			this.userService.save(adminUser);
 		}
-
 	}
 
 }

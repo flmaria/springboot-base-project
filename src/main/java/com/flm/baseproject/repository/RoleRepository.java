@@ -9,6 +9,8 @@ import com.flm.baseproject.model.Role;
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Long> {
 
+	public Role findById(long id);
+	
 	Role findByName(Roles roleName);
 	
 }
