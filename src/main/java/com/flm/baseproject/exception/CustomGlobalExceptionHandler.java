@@ -68,5 +68,10 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
 		ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, error);
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
+	
+	@ExceptionHandler({ RequiredFieldsException.class })
+	public ResponseEntity<Object> handleRequiredFields(RequiredFieldsException ex) {
+		return new ResponseEntity<Object>(ex.fillInStackTrace().getMessage(), HttpStatus.NOT_FOUND);
+	}
 
 }
