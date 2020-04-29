@@ -32,6 +32,6 @@ The following resources have been developed:
 * Update connection data to PostgreSQL in the "application.properties" file;
 * Run "mvn clean install" command;
 
-##Expected result
+## Expected result
 
 Java back-end service that provides end-points for the client layer through token authentication.
