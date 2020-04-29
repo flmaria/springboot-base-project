@@ -1,12 +1,14 @@
 package com.flm.baseproject.service;
 
-import java.util.List;
 
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.stereotype.Service;
 
+import com.flm.baseproject.dto.PageResult;
 import com.flm.baseproject.enumerator.Profiles;
 import com.flm.baseproject.exception.Validations;
 import com.flm.baseproject.model.User;
@@ -29,15 +31,22 @@ public class UserService {
 		if (user.getId() == 0l) {
 			this.validateNew(user);
 			user.setPassword(passwordEncoder.encode(user.getNewPassword()));
+			return repository.save(user);
 		}
 		else {
 			this.validateUpdate(user);
 			
+			User updatedUser = this.findById(user.getId());
+			updatedUser.setName(user.getName());
+			updatedUser.setLogin(user.getLogin());
+			updatedUser.setEmail(user.getEmail());
+			updatedUser.setProfile(user.getProfile());
+			
 			if (StringUtils.isNotEmpty(user.getNewPassword()))
-				user.setPassword(passwordEncoder.encode(user.getNewPassword()));
+				updatedUser.setPassword(passwordEncoder.encode(user.getNewPassword()));
+			
+			return repository.save(updatedUser);
 		}
-		
-		return repository.save(user);
 	}
 	
 	public User registerUser(User user) {
@@ -138,13 +147,13 @@ public class UserService {
 		return repository.findByLogin(login);
 	}
 
-	public void deleteById(long id) {
-		this.validateDelete(id);
+	public void deleteById(long id, long loggedUserId) {
+		this.validateDelete(id, loggedUserId);
 		
 		repository.deleteById(id);
 	}
 	
-	public void validateDelete(long id) {
+	public void validateDelete(long id, long loggedUserId) {
 		Validations validations = new Validations();
 		
 		User user = this.findById(id);
@@ -152,16 +161,31 @@ public class UserService {
 		if (user == null)
 			validations.add("user", "User not found");
 		
+		if (id == loggedUserId) {
+			validations.add("user", "You cannot delete your own user");
+		}
+		
 		validations.throwsExceptions();
 	}
 
-	public List<User> findAllOrderByNameAsc() {
-		return repository.findAllOrderByNameAsc();
-	}
-	
 	public User findByLoginOrEmail(String loginOrEmail) {
 		return repository.findByLoginOrEmail(loginOrEmail);
 	}
-
 	
+	public PageResult<User> findAllPageable(int pageIndex, int pageSize, String sortBy, boolean sortAscending) {
+		Sort sort = null;
+		
+		if (StringUtils.isNotEmpty(sortBy)) {
+			sort = Sort.by(sortBy);
+			
+			if (sortAscending)
+				sort = sort.ascending();
+			else
+				sort = sort.descending();
+		}
+		
+		Page<User> page = this.repository.findAll(PageRequest.of(pageIndex, pageSize, sort));
+		return new PageResult<User>(page.getContent(), page.getTotalElements());
+	}
+		
 }

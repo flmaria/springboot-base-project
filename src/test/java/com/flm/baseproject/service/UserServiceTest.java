@@ -150,8 +150,6 @@ public class UserServiceTest {
 		this.service.save(user);
 	}
 	
-///////
-	
 	@Test
 	public void it_should_register_user() throws Exception {
 		User user = new User();

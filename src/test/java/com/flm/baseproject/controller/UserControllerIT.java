@@ -14,12 +14,15 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flm.baseproject.BasicApplication;
 import com.flm.baseproject.aux.Credentials;
 import com.flm.baseproject.aux.TestMockRestClient;
 import com.flm.baseproject.aux.TestRestClient;
+import com.flm.baseproject.dto.PageResult;
 import com.flm.baseproject.enumerator.Profiles;
 import com.flm.baseproject.enumerator.Roles;
 import com.flm.baseproject.model.Profile;
@@ -102,7 +105,7 @@ public class UserControllerIT {
 	}
 	
 	@Test
-	public void it_should_list_all_users() throws Exception {
+	public void it_should_list_users_pageable() throws Exception {
 		List<User> userList = new ArrayList<User>();
 		
 		User user1 = new User();
@@ -117,12 +120,20 @@ public class UserControllerIT {
 		user2.setLogin("regular-user-controller2");
 		userList.add(user2);
 		
-		Mockito.when(userService.findById(Mockito.anyLong())).thenReturn(this.createAdminUser());
-		Mockito.when(userService.findAllOrderByNameAsc()).thenReturn(userList);
+		PageResult<User> pageResult = new PageResult<User>(userList, userList.size());
 		
-		MvcResult result = testMockRestClient.get("/users/", this.credentials);
+		Mockito.when(userService.findById(Mockito.anyLong())).thenReturn(this.createAdminUser());
+		Mockito.when(userService.findAllPageable(Mockito.anyInt(), Mockito.anyInt(), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(pageResult);
+		
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		params.add("pageIndex", "1");
+		params.add("pageSize", "5");
+		params.add("sortBy", "name");
+		params.add("sortAscending", "false");
+		
+		MvcResult result = testMockRestClient.get("/users/", this.credentials, null, params);
 
-		assertEquals(mapper.writeValueAsString(userList), result.getResponse().getContentAsString());
+		assertEquals(mapper.writeValueAsString(pageResult), result.getResponse().getContentAsString());
 	}
 	
 	@Test
@@ -182,7 +193,7 @@ public class UserControllerIT {
 		user1.setLogin("regular-user-controller1");
 		
 		Mockito.when(userService.findById(this.createAdminUser().getId())).thenReturn(this.createAdminUser());
-		Mockito.doNothing().when(userService).deleteById(user1.getId());
+		Mockito.doNothing().when(userService).deleteById(user1.getId(), 111);
 
 		MvcResult result = testMockRestClient.delete("/users/" + user1.getId(), this.credentials);
 		assertTrue(Boolean.valueOf(result.getResponse().getContentAsString()));
