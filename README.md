@@ -1,6 +1,6 @@
 # Springboot-Base-Project
 
-Project to study Spring Boot resources and developunit and integrations tests.
+Project to study Spring Boot resources and develop unit and integrations tests.
 
 ## What does the project do?
 
