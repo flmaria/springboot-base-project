@@ -19,7 +19,7 @@ public class Validations {
 	
 	public void add(String field, String message) {
 		if (StringUtils.isEmpty(field)) {
-			this.errorList.add(new ErrorFieldDTO("field", "field cannot be empty"));
+			this.errorList.add(new ErrorFieldDTO("field", "field cannot be empty."));
 			this.throwsExceptions();
 		}
 			
