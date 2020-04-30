@@ -31,7 +31,7 @@ import com.flm.baseproject.service.CustomUserDetailsService;
 )
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-	private static final String LOGIN = "/login/**";
+	private static final String LOGIN = "/api/login/**";
 	
 	@Autowired
     private CustomUserDetailsService customUserDetailsService;

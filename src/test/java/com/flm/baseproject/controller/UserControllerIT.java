@@ -131,7 +131,7 @@ public class UserControllerIT {
 		params.add("sortBy", "name");
 		params.add("sortAscending", "false");
 		
-		MvcResult result = testMockRestClient.get("/users/", this.credentials, null, params);
+		MvcResult result = testMockRestClient.get("/api/users/", this.credentials, null, params);
 
 		assertEquals(mapper.writeValueAsString(pageResult), result.getResponse().getContentAsString());
 	}
@@ -147,7 +147,7 @@ public class UserControllerIT {
 		Mockito.when(userService.findById(this.createAdminUser().getId())).thenReturn(this.createAdminUser());
 		Mockito.when(userService.findById(user1.getId())).thenReturn(user1);
 
-		MvcResult result = testMockRestClient.get("/users/" + user1.getId(), this.credentials);
+		MvcResult result = testMockRestClient.get("/api/users/" + user1.getId(), this.credentials);
 
 		assertEquals(mapper.writeValueAsString(user1), result.getResponse().getContentAsString());
 	}
@@ -163,7 +163,7 @@ public class UserControllerIT {
 		Mockito.when(userService.findById(this.createAdminUser().getId())).thenReturn(this.createAdminUser());
 		Mockito.when(userService.save(Mockito.any(User.class))).thenReturn(user1);
 
-		MvcResult result = testMockRestClient.post("/users/", this.credentials, mapper.writeValueAsBytes(user1));
+		MvcResult result = testMockRestClient.post("/api/users/", this.credentials, mapper.writeValueAsBytes(user1));
 
 		assertEquals(mapper.writeValueAsString(user1), result.getResponse().getContentAsString());
 	}
@@ -179,7 +179,7 @@ public class UserControllerIT {
 		Mockito.when(userService.findById(this.createAdminUser().getId())).thenReturn(this.createAdminUser());
 		Mockito.when(userService.save(Mockito.any(User.class))).thenReturn(user1);
 
-		MvcResult result = testMockRestClient.put("/users/", this.credentials, mapper.writeValueAsBytes(user1));
+		MvcResult result = testMockRestClient.put("/api/users/", this.credentials, mapper.writeValueAsBytes(user1));
 
 		assertEquals(mapper.writeValueAsString(user1), result.getResponse().getContentAsString());
 	}
@@ -195,7 +195,7 @@ public class UserControllerIT {
 		Mockito.when(userService.findById(this.createAdminUser().getId())).thenReturn(this.createAdminUser());
 		Mockito.doNothing().when(userService).deleteById(user1.getId(), 111);
 
-		MvcResult result = testMockRestClient.delete("/users/" + user1.getId(), this.credentials);
+		MvcResult result = testMockRestClient.delete("/api/users/" + user1.getId(), this.credentials);
 		assertTrue(Boolean.valueOf(result.getResponse().getContentAsString()));
 	}
 	
