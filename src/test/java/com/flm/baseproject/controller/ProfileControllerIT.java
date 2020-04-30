@@ -134,7 +134,7 @@ public class ProfileControllerIT {
 		Mockito.when(userService.findById(Mockito.anyLong())).thenReturn(this.createAdminUser());
 		
 		Mockito.when(this.profileService.findAll()).thenReturn(this.createAllProfiles());
-		MvcResult result = testMockRestClient.get("/profiles", this.credentials);
+		MvcResult result = testMockRestClient.get("/api/profiles", this.credentials);
 
 		assertEquals(mapper.writeValueAsString(this.createAllProfiles()), result.getResponse().getContentAsString());
 	}

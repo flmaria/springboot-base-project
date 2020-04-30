@@ -53,7 +53,7 @@ public class LoginControllerIT {
 		
 		Mockito.when(userService.registerUser(Mockito.any(User.class))).thenReturn(user);
 		
-		MvcResult result = mockRestClient.post("/login/register", mapper.writeValueAsBytes(user));
+		MvcResult result = mockRestClient.post("/api/login/register", mapper.writeValueAsBytes(user));
 
 		assertTrue(Boolean.valueOf(result.getResponse().getContentAsString()));
 	}

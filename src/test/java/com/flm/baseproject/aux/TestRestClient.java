@@ -51,7 +51,7 @@ public class TestRestClient {
         
         HttpEntity<String> request = new HttpEntity(new ObjectMapper().writeValueAsBytes(loginRequest), headers);
 		
-        return testRestTemplate.postForEntity("/login", request, LoginResponse.class);
+        return testRestTemplate.postForEntity("/api/login", request, LoginResponse.class);
 	}
 	
 }
