@@ -15,6 +15,7 @@ import com.flm.baseproject.enumerator.Profiles;
 import com.flm.baseproject.exception.RequiredFieldsException;
 import com.flm.baseproject.model.Profile;
 import com.flm.baseproject.model.User;
+import com.flm.baseproject.repository.ProfileRepository;
 import com.flm.baseproject.repository.UserRepository;
 
 @SpringBootTest
@@ -27,7 +28,7 @@ public class UserServiceTest {
 	PasswordEncoder passwordEncoder;
 	
 	@Mock
-	ProfileService profileService;
+	ProfileRepository profileRepository;
 	
 	@InjectMocks
 	UserService service;
@@ -161,7 +162,7 @@ public class UserServiceTest {
 		Profile profile = new Profile();
 		profile.setName(Profiles.PROFILE_REGULAR.getName());
 		
-		Mockito.when(profileService.findByName(Mockito.any(String.class))).thenReturn(profile);
+		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
 		Mockito.when(passwordEncoder.encode(Mockito.any(String.class))).thenReturn("pwd");
 		Mockito.when(repository.findByLogin(Mockito.any(String.class))).thenReturn(null);
 		Mockito.when(repository.findByEmail(Mockito.any(String.class))).thenReturn(null);
@@ -182,7 +183,7 @@ public class UserServiceTest {
 		Profile profile = new Profile();
 		profile.setName(Profiles.PROFILE_REGULAR.getName());
 		
-		Mockito.when(profileService.findByName(Mockito.any(String.class))).thenReturn(profile);
+		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
 		Mockito.when(passwordEncoder.encode(Mockito.any(String.class))).thenReturn("pwd");
 		Mockito.when(repository.findByLogin(Mockito.any(String.class))).thenReturn(null);
 		Mockito.when(repository.findByEmail(Mockito.any(String.class))).thenReturn(null);
@@ -202,7 +203,7 @@ public class UserServiceTest {
 		Profile profile = new Profile();
 		profile.setName(Profiles.PROFILE_REGULAR.getName());
 		
-		Mockito.when(profileService.findByName(Mockito.any(String.class))).thenReturn(profile);
+		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
 		
 		this.service.registerUser(user);
 	}
@@ -217,7 +218,7 @@ public class UserServiceTest {
 		Profile profile = new Profile();
 		profile.setName(Profiles.PROFILE_REGULAR.getName());
 		
-		Mockito.when(profileService.findByName(Mockito.any(String.class))).thenReturn(profile);
+		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
 		
 		this.service.registerUser(user);
 	}
@@ -233,7 +234,7 @@ public class UserServiceTest {
 		Profile profile = new Profile();
 		profile.setName(Profiles.PROFILE_REGULAR.getName());
 		
-		Mockito.when(profileService.findByName(Mockito.any(String.class))).thenReturn(profile);
+		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
 		
 		User user2 = new User();
 		user2.setId(100l);
@@ -255,7 +256,7 @@ public class UserServiceTest {
 		Profile profile = new Profile();
 		profile.setName(Profiles.PROFILE_REGULAR.getName());
 		
-		Mockito.when(profileService.findByName(Mockito.any(String.class))).thenReturn(profile);
+		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
 		
 		this.service.registerUser(user);
 	}
@@ -271,7 +272,7 @@ public class UserServiceTest {
 		Profile profile = new Profile();
 		profile.setName(Profiles.PROFILE_REGULAR.getName());
 		
-		Mockito.when(profileService.findByName(Mockito.any(String.class))).thenReturn(profile);
+		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
 		
 		User user2 = new User();
 		user2.setId(100l);
@@ -294,7 +295,7 @@ public class UserServiceTest {
 		Profile profile = new Profile();
 		profile.setName(Profiles.PROFILE_REGULAR.getName());
 		
-		Mockito.when(profileService.findByName(Mockito.any(String.class))).thenReturn(profile);
+		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
 		
 		this.service.registerUser(user);
 	}

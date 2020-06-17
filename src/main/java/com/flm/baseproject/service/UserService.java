@@ -7,11 +7,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.flm.baseproject.dto.PageResult;
 import com.flm.baseproject.enumerator.Profiles;
 import com.flm.baseproject.exception.Validations;
 import com.flm.baseproject.model.User;
+import com.flm.baseproject.repository.ProfileRepository;
 import com.flm.baseproject.repository.UserRepository;
 import com.flm.baseproject.utils.StringUtils;
 
@@ -23,10 +25,11 @@ public class UserService {
 
 	private final UserRepository repository;
 	
-	private final ProfileService profileService;
+	private final ProfileRepository profileRepository;
 
 	private final PasswordEncoder passwordEncoder;
 
+	@Transactional
 	public User save(User user) {
 		if (user.getId() == 0l) {
 			this.validateNew(user);
@@ -49,8 +52,9 @@ public class UserService {
 		}
 	}
 	
+	@Transactional
 	public User registerUser(User user) {
-		user.setProfile(this.profileService.findByName(Profiles.PROFILE_REGULAR.getName()));
+		user.setProfile(this.profileRepository.findByName(Profiles.PROFILE_REGULAR.getName()));
 		
 		this.validateNew(user);
 		
@@ -136,8 +140,6 @@ public class UserService {
 		
 		validations.throwsExceptions();
 	}
-	
-
 
 	public User findById(long id) {
 		return repository.findById(id);
@@ -147,6 +149,7 @@ public class UserService {
 		return repository.findByLogin(login);
 	}
 
+	@Transactional
 	public void deleteById(long id, long loggedUserId) {
 		this.validateDelete(id, loggedUserId);
 		
@@ -178,10 +181,12 @@ public class UserService {
 		if (StringUtils.isNotEmpty(sortBy)) {
 			sort = Sort.by(sortBy);
 			
-			if (sortAscending)
+			if (sortAscending) {
 				sort = sort.ascending();
-			else
+			}
+			else {
 				sort = sort.descending();
+			}
 		}
 		
 		Page<User> page = this.repository.findAll(PageRequest.of(pageIndex, pageSize, sort));

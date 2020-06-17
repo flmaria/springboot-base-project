@@ -1,6 +1,7 @@
 package com.flm.baseproject.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.flm.baseproject.enumerator.Roles;
 import com.flm.baseproject.exception.Validations;
@@ -24,6 +25,7 @@ public class RoleService {
 		return this.repository.findByName(roleName);
 	}
 	
+	@Transactional
 	public Role save(Role role) {
 		if (role.getId() == 0l)
 			this.validateNew(role);
