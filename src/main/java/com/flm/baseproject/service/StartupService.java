@@ -2,6 +2,7 @@ package com.flm.baseproject.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.flm.baseproject.enumerator.Profiles;
 import com.flm.baseproject.enumerator.Roles;
@@ -33,6 +34,7 @@ public class StartupService {
 	@Value("${admin.password}")
 	private String adminPassword;
 
+	@Transactional
 	@SuppressWarnings("rawtypes")
 	public void init() {
 

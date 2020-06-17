@@ -22,8 +22,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE UPPER(u.email) = UPPER(:email)")
 	public User findByEmail(@Param("email") String email);
     
-    //@Example: custom query pageable
-//    @Query("SELECT u FROM User u WHERE UPPER(u.name) LIKE UPPER(CONCAT('%',:name, '%'))")
-//	public Page<User> searchByName(@Param("name") String name, Pageable pageRequest);
-
 }

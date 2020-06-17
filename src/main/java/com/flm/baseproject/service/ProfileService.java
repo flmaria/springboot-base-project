@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.flm.baseproject.exception.Validations;
 import com.flm.baseproject.model.Profile;
@@ -20,6 +21,7 @@ public class ProfileService {
 
 	private final ProfileRepository repository;
 
+	@Transactional
 	public Profile save(Profile profile) {
 		this.validate(profile);
 		

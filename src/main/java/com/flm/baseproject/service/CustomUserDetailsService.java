@@ -25,8 +25,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     	
         User user = this.userService.findByLoginOrEmail(usernameOrEmail);
         
-        if (user == null)
+        if (user == null) {
         	throw new UsernameNotFoundException("User not found with login or email : " + usernameOrEmail);
+        }
     	
     	return UserPrincipal.create(user);
     }
@@ -36,8 +37,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserById(Long id) {
     	User user = this.userService.findById(id);
     	
-    	if (user == null)
+    	if (user == null) {
     		throw new UsernameNotFoundException("User not found with id : " + id);
+    	}
     	
     	return UserPrincipal.create(user);
     }
