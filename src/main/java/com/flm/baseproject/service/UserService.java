@@ -1,6 +1,9 @@
 package com.flm.baseproject.service;
 
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -8,10 +11,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import com.flm.baseproject.dto.PageResult;
 import com.flm.baseproject.enumerator.Profiles;
 import com.flm.baseproject.exception.Validations;
+import com.flm.baseproject.model.Profile;
 import com.flm.baseproject.model.User;
 import com.flm.baseproject.repository.ProfileRepository;
 import com.flm.baseproject.repository.UserRepository;
@@ -19,6 +24,7 @@ import com.flm.baseproject.utils.StringUtils;
 
 import lombok.RequiredArgsConstructor;
 
+//@Validated
 @RequiredArgsConstructor
 @Service
 public class UserService {
@@ -30,7 +36,7 @@ public class UserService {
 	private final PasswordEncoder passwordEncoder;
 
 	@Transactional
-	public User save(User user) {
+	public User save(@Valid User user) {
 		if (user.getId() == 0l) {
 			this.validateNew(user);
 			user.setPassword(passwordEncoder.encode(user.getNewPassword()));
@@ -72,29 +78,20 @@ public class UserService {
 			validations = new Validations();
 		}
 		
-		//Name
-		if (StringUtils.isEmpty(user.getName())) {
-			validations.add("name", "Enter the Name");
-		}
-		
 		//Login
-		if (StringUtils.isEmpty(user.getLogin())) {
-			validations.add("login", "Enter the Login");
-		}
+		User userLogin = this.repository.findByLogin(user.getLogin());
 		
-		if (user.getId() == 0l) {
-			if (this.findByLogin(user.getLogin()) != null) {
+		if (userLogin != null) {
+			if (user.getId() == 0l || (user.getId() >= 0l && userLogin.getId() != user.getId())) {
 				validations.add("login", "Enter a different Login");
 			}
 		}
 		
 		//E-mail
-		if (StringUtils.isEmpty(user.getEmail())) {
-			validations.add("e-mail", "Enter the E-mail");
-		}
+		User userEmail = this.repository.findByEmail(user.getEmail());
 		
-		if (user.getId() == 0l) {
-			if (this.repository.findByEmail(user.getEmail()) != null) {
+		if (userEmail != null) {
+			if (user.getId() == 0l || (user.getId() >= 0l && userEmail.getId() != user.getId())) {
 				validations.add("e-mail", "Enter a different E-mail");
 			}
 		}
@@ -110,6 +107,11 @@ public class UserService {
 		if (user.getProfile() == null) {
 			validations.add("profile", "Enter a Profile");
 		}
+		else {
+			if (this.profileRepository.findByName(user.getProfile().getName()) == null) {
+				validations.add("profile", "Profile not found");
+			}
+		}
 		
 		if (triggerException)
 			validations.throwsExceptions();
@@ -122,20 +124,8 @@ public class UserService {
 		
 		User current = this.findById(user.getId());
 		
-		if (current == null)
+		if (current == null) {
 			validations.add("user", "User not found");
-		else {
-			if (StringUtils.isNotEmpty(user.getLogin()) && !user.getLogin().equals(current.getLogin())) {
-				if (this.findByLogin(user.getLogin()) != null) {
-					validations.add("login", "Enter a different Login");
-				}
-			}
-			
-			if (StringUtils.isNotEmpty(user.getEmail()) && !user.getEmail().equals(current.getEmail())) {
-				if (this.repository.findByEmail(user.getEmail()) != null) {
-					validations.add("e-mail", "Enter a different E-mail");
-				}
-			}
 		}
 		
 		validations.throwsExceptions();
@@ -161,10 +151,10 @@ public class UserService {
 		
 		User user = this.findById(id);
 		
-		if (user == null)
+		if (user == null) {
 			validations.add("user", "User not found");
-		
-		if (id == loggedUserId) {
+		}
+		else if (id == loggedUserId) {
 			validations.add("user", "You cannot delete your own user");
 		}
 		

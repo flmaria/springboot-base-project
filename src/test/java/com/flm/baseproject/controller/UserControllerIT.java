@@ -8,12 +8,17 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -36,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = BasicApplication.class)
 @AutoConfigureMockMvc
+//@WebMvcTest(controllers = UserControllerIT.class)
 public class UserControllerIT {
 	
 	@MockBean
@@ -60,6 +66,7 @@ public class UserControllerIT {
 		this.mapper = new ObjectMapper();
 		
 		this.restClient = new TestRestClient(testRestTemplate);
+		
 		this.testMockRestClient = new TestMockRestClient(mockMvc);
       
 		//Creates a token to an admin user
@@ -68,16 +75,22 @@ public class UserControllerIT {
 	}
 	
 	private Profile createAdminProfile() {
-		Profiles adminProfile = Profiles.PROFILE_ADMIN;
-		
+		return this.createProfile(Profiles.PROFILE_ADMIN);
+	}
+	
+	private Profile createRegularProfile() {
+		return this.createProfile(Profiles.PROFILE_REGULAR);
+	}
+	
+	private Profile createProfile(Profiles profiles) {
 		Profile profile = new Profile();
 		profile = new Profile();
 		profile.setId(99l);
-		profile.setName(adminProfile.getName());
+		profile.setName(profiles.getName());
 		
 		long countRole = 1l;
 		
-		for (Enum e : adminProfile.getRoles()) {
+		for (Enum e : profiles.getRoles()) {
 			Roles roles = (Roles) e;
 			
 			Role role = new Role();
@@ -151,6 +164,8 @@ public class UserControllerIT {
 
 		assertEquals(mapper.writeValueAsString(user1), result.getResponse().getContentAsString());
 	}
+
+	//Create User ----
 	
 	@Test
 	public void it_should_create_user() throws Exception {
@@ -159,6 +174,7 @@ public class UserControllerIT {
 		user1.setName("regular-user-controller1");
 		user1.setEmail("regular-user-controller1@mail.com");
 		user1.setLogin("regular-user-controller1");
+		user1.setProfile(this.createRegularProfile());
 		
 		Mockito.when(userService.findById(this.createAdminUser().getId())).thenReturn(this.createAdminUser());
 		Mockito.when(userService.save(Mockito.any(User.class))).thenReturn(user1);
@@ -169,12 +185,91 @@ public class UserControllerIT {
 	}
 	
 	@Test
+	public void it_should_not_create_user_empty_name() throws Exception {
+		User user1 = new User();
+		user1.setId(1111l);
+		user1.setEmail("regular-user-controller1@mail.com");
+		user1.setLogin("regular-user-controller1");
+		user1.setProfile(this.createRegularProfile());
+		
+		Mockito.when(userService.findById(this.createAdminUser().getId())).thenReturn(this.createAdminUser());
+		Mockito.when(userService.save(Mockito.any(User.class))).thenReturn(user1);
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.add(HttpHeaders.AUTHORIZATION, this.credentials.getToken());
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/users/").headers(headers).content(mapper.writeValueAsBytes(user1)))
+			.andExpect(MockMvcResultMatchers.status().isBadRequest());
+	}
+	
+	@Test
+	public void it_should_not_create_user_empty_login() throws Exception {
+		User user1 = new User();
+		user1.setId(1111l);
+		user1.setName("regular-user-controller1");
+		user1.setEmail("regular-user-controller1@test.com");
+		user1.setProfile(this.createRegularProfile());
+		
+		Mockito.when(userService.findById(this.createAdminUser().getId())).thenReturn(this.createAdminUser());
+		Mockito.when(userService.save(Mockito.any(User.class))).thenReturn(user1);
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.add(HttpHeaders.AUTHORIZATION, this.credentials.getToken());
+        
+		mockMvc.perform(MockMvcRequestBuilders.post("/api/users/").headers(headers).content(mapper.writeValueAsBytes(user1)))
+			.andExpect(MockMvcResultMatchers.status().isBadRequest());
+	}
+	
+	@Test
+	public void it_should_not_create_user_empty_email() throws Exception {
+		User user1 = new User();
+		user1.setId(1111l);
+		user1.setName("regular-user-controller1");
+		user1.setLogin("regular-user-controller1");
+		user1.setProfile(this.createRegularProfile());
+		
+		Mockito.when(userService.findById(this.createAdminUser().getId())).thenReturn(this.createAdminUser());
+		Mockito.when(userService.save(Mockito.any(User.class))).thenReturn(user1);
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.add(HttpHeaders.AUTHORIZATION, this.credentials.getToken());
+        
+		mockMvc.perform(MockMvcRequestBuilders.post("/api/users/").headers(headers).content(mapper.writeValueAsBytes(user1)))
+			.andExpect(MockMvcResultMatchers.status().isBadRequest());
+	}
+	
+	@Test
+	public void it_should_not_create_user_invalid_email() throws Exception {
+		User user1 = new User();
+		user1.setId(1111l);
+		user1.setName("regular-user-controller1");
+		user1.setLogin("regular-user-controller1");
+		user1.setEmail("regular-user-controller1");
+		user1.setProfile(this.createRegularProfile());
+		
+		Mockito.when(userService.findById(this.createAdminUser().getId())).thenReturn(this.createAdminUser());
+		Mockito.when(userService.save(Mockito.any(User.class))).thenReturn(user1);
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.add(HttpHeaders.AUTHORIZATION, this.credentials.getToken());
+        
+		mockMvc.perform(MockMvcRequestBuilders.post("/api/users/").headers(headers).content(mapper.writeValueAsBytes(user1)))
+			.andExpect(MockMvcResultMatchers.status().isBadRequest());
+	}
+	
+	//Update User ----
+	
+	@Test
 	public void it_should_update_user() throws Exception {
 		User user1 = new User();
 		user1.setId(1111l);
 		user1.setName("regular-user-controller1");
 		user1.setEmail("regular-user-controller1@mail.com");
 		user1.setLogin("regular-user-controller1");
+		user1.setProfile(this.createRegularProfile());
 		
 		Mockito.when(userService.findById(this.createAdminUser().getId())).thenReturn(this.createAdminUser());
 		Mockito.when(userService.save(Mockito.any(User.class))).thenReturn(user1);
@@ -182,6 +277,84 @@ public class UserControllerIT {
 		MvcResult result = testMockRestClient.put("/api/users/", this.credentials, mapper.writeValueAsBytes(user1));
 
 		assertEquals(mapper.writeValueAsString(user1), result.getResponse().getContentAsString());
+	}
+	
+	
+	@Test
+	public void it_should_not_update_user_empty_name() throws Exception {
+		User user1 = new User();
+		user1.setId(1111l);
+		user1.setEmail("regular-user-controller1@mail.com");
+		user1.setLogin("regular-user-controller1");
+		user1.setProfile(this.createRegularProfile());
+		
+		Mockito.when(userService.findById(this.createAdminUser().getId())).thenReturn(this.createAdminUser());
+		Mockito.when(userService.save(Mockito.any(User.class))).thenReturn(user1);
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.add(HttpHeaders.AUTHORIZATION, this.credentials.getToken());
+        
+		mockMvc.perform(MockMvcRequestBuilders.put("/api/users/").headers(headers).content(mapper.writeValueAsBytes(user1)))
+			.andExpect(MockMvcResultMatchers.status().isBadRequest());
+	}
+	
+	@Test
+	public void it_should_not_update_user_empty_login() throws Exception {
+		User user1 = new User();
+		user1.setId(1111l);
+		user1.setName("regular-user-controller1");
+		user1.setEmail("regular-user-controller1@test.com");
+		user1.setProfile(this.createRegularProfile());
+		
+		Mockito.when(userService.findById(this.createAdminUser().getId())).thenReturn(this.createAdminUser());
+		Mockito.when(userService.save(Mockito.any(User.class))).thenReturn(user1);
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.add(HttpHeaders.AUTHORIZATION, this.credentials.getToken());
+        
+		mockMvc.perform(MockMvcRequestBuilders.put("/api/users/").headers(headers).content(mapper.writeValueAsBytes(user1)))
+			.andExpect(MockMvcResultMatchers.status().isBadRequest());
+	}
+	
+	@Test
+	public void it_should_not_update_user_empty_email() throws Exception {
+		User user1 = new User();
+		user1.setId(1111l);
+		user1.setName("regular-user-controller1");
+		user1.setLogin("regular-user-controller1");
+		user1.setProfile(this.createRegularProfile());
+		
+		Mockito.when(userService.findById(this.createAdminUser().getId())).thenReturn(this.createAdminUser());
+		Mockito.when(userService.save(Mockito.any(User.class))).thenReturn(user1);
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.add(HttpHeaders.AUTHORIZATION, this.credentials.getToken());
+        
+		mockMvc.perform(MockMvcRequestBuilders.put("/api/users/").headers(headers).content(mapper.writeValueAsBytes(user1)))
+			.andExpect(MockMvcResultMatchers.status().isBadRequest());
+	}
+	
+	@Test
+	public void it_should_not_update_user_invalid_email() throws Exception {
+		User user1 = new User();
+		user1.setId(1111l);
+		user1.setName("regular-user-controller1");
+		user1.setLogin("regular-user-controller1");
+		user1.setEmail("regular-user-controller1");
+		user1.setProfile(this.createRegularProfile());
+		
+		Mockito.when(userService.findById(this.createAdminUser().getId())).thenReturn(this.createAdminUser());
+		Mockito.when(userService.save(Mockito.any(User.class))).thenReturn(user1);
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.add(HttpHeaders.AUTHORIZATION, this.credentials.getToken());
+        
+		mockMvc.perform(MockMvcRequestBuilders.put("/api/users/").headers(headers).content(mapper.writeValueAsBytes(user1)))
+			.andExpect(MockMvcResultMatchers.status().isBadRequest());
 	}
 	
 	@Test
