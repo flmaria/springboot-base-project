@@ -4,12 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.flm.baseproject.enumerator.Profiles;
 import com.flm.baseproject.exception.RequiredFieldsException;
@@ -18,6 +20,7 @@ import com.flm.baseproject.model.User;
 import com.flm.baseproject.repository.ProfileRepository;
 import com.flm.baseproject.repository.UserRepository;
 
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 public class UserServiceTest {
 
@@ -33,6 +36,9 @@ public class UserServiceTest {
 	@InjectMocks
 	UserService service;
 	
+//	@Autowired
+//	UserService service;
+	
 	@Before
 	public void init() {
 		MockitoAnnotations.initMocks(this);
@@ -45,7 +51,12 @@ public class UserServiceTest {
 		user.setLogin("user-service-test-login");
 		user.setEmail("user-service-test@test.com");
 		user.setNewPassword("123");
-		user.setProfile(new Profile());
+		
+		Profile profile = new Profile();
+		profile.setName(Profiles.PROFILE_REGULAR.getName());
+		user.setProfile(profile);
+		
+		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
 		
 		Mockito.when(passwordEncoder.encode(Mockito.any(String.class))).thenReturn("pwd");
 		Mockito.when(repository.findByLogin(Mockito.any(String.class))).thenReturn(null);
@@ -57,35 +68,18 @@ public class UserServiceTest {
 	}
 	
 	@Test(expected = RequiredFieldsException.class)
-	public void it_should_not_save_empty_name() throws Exception {
-		User user = new User();
-		user.setLogin("user-service-test-login");
-		user.setEmail("user-service-test@test.com");
-		user.setNewPassword("123");
-		user.setProfile(new Profile());
-		
-		this.service.save(user);
-	}
-	
-	@Test(expected = RequiredFieldsException.class)
-	public void it_should_not_save_empty_login() throws Exception {
-		User user = new User();
-		user.setName("user-service-test");
-		user.setEmail("user-service-test@test.com");
-		user.setNewPassword("123");
-		user.setProfile(new Profile());
-		
-		this.service.save(user);
-	}
-	
-	@Test(expected = RequiredFieldsException.class)
 	public void it_should_not_save_duplicated_login() throws Exception {
 		User user = new User();
 		user.setName("user-service-test");
 		user.setLogin("user-service-test-login");
 		user.setEmail("user-service-test@test.com");
 		user.setNewPassword("123");
-		user.setProfile(new Profile());
+		
+		Profile profile = new Profile();
+		profile.setName(Profiles.PROFILE_REGULAR.getName());
+		user.setProfile(profile);
+		
+		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
 		
 		User user2 = new User();
 		user2.setId(100l);
@@ -98,24 +92,18 @@ public class UserServiceTest {
 	}
 	
 	@Test(expected = RequiredFieldsException.class)
-	public void it_should_not_save_empty_email() throws Exception {
-		User user = new User();
-		user.setName("user-service-test");
-		user.setLogin("user-service-test-login");
-		user.setNewPassword("123");
-		user.setProfile(new Profile());
-		
-		this.service.save(user);
-	}
-	
-	@Test(expected = RequiredFieldsException.class)
 	public void it_should_not_save_duplicated_email() throws Exception {
 		User user = new User();
 		user.setName("user-service-test");
 		user.setLogin("user-service-test-login");
 		user.setEmail("user-service-test@test.com");
 		user.setNewPassword("123");
-		user.setProfile(new Profile());
+		
+		Profile profile = new Profile();
+		profile.setName(Profiles.PROFILE_REGULAR.getName());
+		user.setProfile(profile);
+		
+		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
 		
 		User user2 = new User();
 		user2.setId(100l);
@@ -135,7 +123,11 @@ public class UserServiceTest {
 		user.setLogin("user-service-test-login");
 		user.setEmail("user-service-test@test.com");
 		
-		user.setProfile(new Profile());
+		Profile profile = new Profile();
+		profile.setName(Profiles.PROFILE_REGULAR.getName());
+		user.setProfile(profile);
+		
+		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
 		
 		this.service.save(user);
 	}
@@ -148,9 +140,18 @@ public class UserServiceTest {
 		user.setEmail("user-service-test@test.com");
 		user.setNewPassword("123");
 		
-		this.service.save(user);
+		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(null);
+		
+		Mockito.when(passwordEncoder.encode(Mockito.any(String.class))).thenReturn("pwd");
+		Mockito.when(repository.findByLogin(Mockito.any(String.class))).thenReturn(null);
+		Mockito.when(repository.findByEmail(Mockito.any(String.class))).thenReturn(null);
+		
+		Mockito.when(repository.save(Mockito.any(User.class))).thenReturn(user);
+		
+		assertEquals(user.getName(), this.service.save(user).getName());
 	}
 	
+
 	@Test
 	public void it_should_register_user() throws Exception {
 		User user = new User();
@@ -159,8 +160,10 @@ public class UserServiceTest {
 		user.setEmail("user-service-test@test.com");
 		user.setNewPassword("123");
 		
+		
 		Profile profile = new Profile();
 		profile.setName(Profiles.PROFILE_REGULAR.getName());
+		user.setProfile(profile);
 		
 		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
 		Mockito.when(passwordEncoder.encode(Mockito.any(String.class))).thenReturn("pwd");
@@ -194,98 +197,6 @@ public class UserServiceTest {
 	}
 	
 	@Test(expected = RequiredFieldsException.class)
-	public void it_should_not_register_user_empty_name() throws Exception {
-		User user = new User();
-		user.setLogin("user-service-test-login");
-		user.setEmail("user-service-test@test.com");
-		user.setNewPassword("123");
-		
-		Profile profile = new Profile();
-		profile.setName(Profiles.PROFILE_REGULAR.getName());
-		
-		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
-		
-		this.service.registerUser(user);
-	}
-	
-	@Test(expected = RequiredFieldsException.class)
-	public void it_should_not_register_user_empty_login() throws Exception {
-		User user = new User();
-		user.setName("user-service-test");
-		user.setEmail("user-service-test@test.com");
-		user.setNewPassword("123");
-		
-		Profile profile = new Profile();
-		profile.setName(Profiles.PROFILE_REGULAR.getName());
-		
-		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
-		
-		this.service.registerUser(user);
-	}
-	
-	@Test(expected = RequiredFieldsException.class)
-	public void it_should_not_register_user_duplicated_login() throws Exception {
-		User user = new User();
-		user.setName("user-service-test");
-		user.setLogin("user-service-test-login");
-		user.setEmail("user-service-test@test.com");
-		user.setNewPassword("123");
-		
-		Profile profile = new Profile();
-		profile.setName(Profiles.PROFILE_REGULAR.getName());
-		
-		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
-		
-		User user2 = new User();
-		user2.setId(100l);
-		user2.setName("user-service-test");
-		user2.setLogin("user-service-test-login");
-		
-		Mockito.when(repository.findByLogin(Mockito.any(String.class))).thenReturn(user2);
-		
-		this.service.registerUser(user);
-	}
-	
-	@Test(expected = RequiredFieldsException.class)
-	public void it_should_not_register_user_empty_email() throws Exception {
-		User user = new User();
-		user.setName("user-service-test");
-		user.setLogin("user-service-test-login");
-		user.setNewPassword("123");
-		
-		Profile profile = new Profile();
-		profile.setName(Profiles.PROFILE_REGULAR.getName());
-		
-		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
-		
-		this.service.registerUser(user);
-	}
-	
-	@Test(expected = RequiredFieldsException.class)
-	public void it_should_not_register_user_duplicated_email() throws Exception {
-		User user = new User();
-		user.setName("user-service-test");
-		user.setLogin("user-service-test-login");
-		user.setEmail("user-service-test@test.com");
-		user.setNewPassword("123");
-		
-		Profile profile = new Profile();
-		profile.setName(Profiles.PROFILE_REGULAR.getName());
-		
-		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
-		
-		User user2 = new User();
-		user2.setId(100l);
-		user2.setName("user-service-test");
-		user2.setLogin("user-service-test-login");
-		user2.setEmail("user-service-test@test.com");
-		
-		Mockito.when(repository.findByEmail(Mockito.any(String.class))).thenReturn(user2);
-		
-		this.service.registerUser(user);
-	}
-	
-	@Test(expected = RequiredFieldsException.class)
 	public void it_should_not_register_user_empty_new_password() throws Exception {
 		User user = new User();
 		user.setName("user-service-test");
@@ -294,13 +205,13 @@ public class UserServiceTest {
 		
 		Profile profile = new Profile();
 		profile.setName(Profiles.PROFILE_REGULAR.getName());
+		user.setProfile(profile);
 		
 		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
 		
 		this.service.registerUser(user);
 	}
-	
-	
+
 	@Test
 	public void it_should_update() throws Exception {
 		User user = new User();
@@ -308,59 +219,38 @@ public class UserServiceTest {
 		user.setName("user-service-test");
 		user.setLogin("user-service-test-login");
 		user.setEmail("user-service-test@test.com");
-		user.setProfile(new Profile());
 		
+		Profile profile = new Profile();
+		profile.setName(Profiles.PROFILE_REGULAR.getName());
+		user.setProfile(profile);
+		
+		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
 		Mockito.when(repository.findById(Mockito.anyLong())).thenReturn(user);
-		
 		Mockito.when(repository.save(Mockito.any(User.class))).thenReturn(user);
 		
 		assertEquals(user.getId(), this.service.save(user).getId());
 	}
-	
+
+		
 	@Test(expected = RequiredFieldsException.class)
-	public void it_should_update_user_not_found() throws Exception {
+	public void it_should_not_update_user_not_found() throws Exception {
 		User user = new User();
 		user.setId(99l);
 		user.setName("user-service-test");
 		user.setLogin("user-service-test-login");
 		user.setEmail("user-service-test@test.com");
-		user.setProfile(new Profile());
+		
+		Profile profile = new Profile();
+		profile.setName(Profiles.PROFILE_REGULAR.getName());
+		user.setProfile(profile);
+		
+		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
 		
 		Mockito.when(repository.findById(Mockito.anyLong())).thenReturn(null);
 		
 		this.service.save(user);
 	}
-	
-	@Test(expected = RequiredFieldsException.class)
-	public void it_should_not_update_empty_name() throws Exception {
-		User user = new User();
-		user.setId(99l);
-		user.setLogin("user-service-test-login");
-		user.setEmail("user-service-test@test.com");
-		user.setProfile(new Profile());
-		
-		Mockito.when(repository.findById(Mockito.anyLong())).thenReturn(user);
-		
-		Mockito.when(repository.save(Mockito.any(User.class))).thenReturn(user);
-		
-		this.service.save(user);
-	}
-	
-	@Test(expected = RequiredFieldsException.class)
-	public void it_should_not_update_empty_login() throws Exception {
-		User user = new User();
-		user.setId(99l);
-		user.setName("user-service-test");
-		user.setEmail("user-service-test@test.com");
-		user.setProfile(new Profile());
-		
-		Mockito.when(repository.findById(Mockito.anyLong())).thenReturn(user);
-		
-		Mockito.when(repository.save(Mockito.any(User.class))).thenReturn(user);
-		
-		this.service.save(user);
-	}
-	
+
 	@Test(expected = RequiredFieldsException.class)
 	public void it_should_not_update_duplicated_login() throws Exception {
 		User user = new User();
@@ -369,7 +259,12 @@ public class UserServiceTest {
 		user.setLogin("user-service-test-login-different");
 		user.setEmail("user-service-test@test.com");
 		user.setNewPassword("123");
-		user.setProfile(new Profile());
+		
+		Profile profile = new Profile();
+		profile.setName(Profiles.PROFILE_REGULAR.getName());
+		user.setProfile(profile);
+		
+		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
 		
 		User currentUser = new User();
 		currentUser.setId(99l);
@@ -389,22 +284,7 @@ public class UserServiceTest {
 		
 		this.service.save(user);
 	}
-	
-	@Test(expected = RequiredFieldsException.class)
-	public void it_should_not_update_empty_email() throws Exception {
-		User user = new User();
-		user.setId(99l);
-		user.setName("user-service-test");
-		user.setLogin("user-service-test-login");
-		user.setProfile(new Profile());
-		
-		Mockito.when(repository.findById(Mockito.anyLong())).thenReturn(user);
-		
-		Mockito.when(repository.save(Mockito.any(User.class))).thenReturn(user);
-		
-		this.service.save(user);
-	}
-	
+
 	@Test(expected = RequiredFieldsException.class)
 	public void it_should_not_update_duplicated_email() throws Exception {
 		User user = new User();
@@ -413,7 +293,12 @@ public class UserServiceTest {
 		user.setLogin("user-service-test-login");
 		user.setEmail("user-service-test@test.com.different");
 		user.setNewPassword("123");
-		user.setProfile(new Profile());
+		
+		Profile profile = new Profile();
+		profile.setName(Profiles.PROFILE_REGULAR.getName());
+		user.setProfile(profile);
+		
+		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(profile);
 		
 		User currentUser = new User();
 		currentUser.setId(99l);
@@ -433,6 +318,21 @@ public class UserServiceTest {
 		Mockito.when(repository.findByEmail(Mockito.any(String.class))).thenReturn(user2);
 		
 		this.service.save(user);
+	}
+	
+	@Test(expected = RequiredFieldsException.class)
+	public void it_should_not_update_empty_profile() throws Exception {
+		User user = new User();
+		user.setId(99l);
+		user.setName("user-service-test");
+		user.setLogin("user-service-test-login");
+		user.setEmail("user-service-test@test.com");
+		
+		Mockito.when(profileRepository.findByName(Mockito.any(String.class))).thenReturn(null);
+		Mockito.when(repository.findById(Mockito.anyLong())).thenReturn(user);
+		Mockito.when(repository.save(Mockito.any(User.class))).thenReturn(user);
+		
+		assertEquals(user.getId(), this.service.save(user).getId());
 	}
 	
 }

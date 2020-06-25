@@ -11,6 +11,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -25,12 +27,15 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
+	@NotEmpty
 	@Column(name = "name", nullable = false, length = 40)
 	private String name;
 
+	@NotEmpty
 	@Column(name = "login", nullable = false, length = 40)
 	private String login;
 
+	@NotEmpty
 	@Email
 	@Column(name = "email", nullable = false, length = 40)
 	private String email;
